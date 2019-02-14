@@ -34,6 +34,7 @@ export default class RangeCollection {
     const rangesL = this.ranges.length;
     let middleRange = new Range(range[0], range[1]);
 
+    // Base conditions
     if (rangesL === 0) {
       this.ranges.push(middleRange);
       return;
@@ -51,14 +52,17 @@ export default class RangeCollection {
     let ind = 0;
     for (; ind < rangesL; ind += 1) {
       const currentRange = this.ranges[ind];
+      // Skip ranges smaller than input range
       if (middleRange.left > currentRange.right) {
         lesserIndex += 1;
         continue;
       }
+      // No need to look ahead as ranges are greater than merge range
       if (middleRange.right < currentRange.left) {
         break;
       }
 
+      // Merge overlapping ranges
       middleRange = this._merge(middleRange, currentRange);
     }
 
@@ -75,6 +79,7 @@ export default class RangeCollection {
     const rangesL = this.ranges.length;
     const removeRange = new Range(range[0], range[1]);
 
+    // Skip if no ranges or range outside current ranges
     if (
       rangesL === 0 ||
       this.ranges[rangesL - 1].right < removeRange.left ||
@@ -88,14 +93,17 @@ export default class RangeCollection {
     let ind = 0;
     for (; ind < rangesL; ind += 1) {
       const currentRange = this.ranges[ind];
+      // Skip ranges smaller than input range
       if (removeRange.left > currentRange.right) {
         lesserIndex += 1;
         continue;
       }
+      // No need to look ahead as ranges are greater than input range
       if (removeRange.right < currentRange.left) {
         break;
       }
 
+      // Create new range for left and right as required
       if (currentRange.left < removeRange.left) {
         middleRanges.push(new Range(currentRange.left, removeRange.left));
       }
