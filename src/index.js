@@ -14,7 +14,7 @@ export default class RangeCollection {
   }
 
   /**
-   * Merges two mergable ranges and outputs a new range.
+   * Merges two ranges that can be merged and outputs a new range.
    * @param {Range} range1 - First range to merge.
    * @param {Range} range2 - Second range to merge.
    * @returns {Range} Merged range of range1 and range2
