@@ -27,6 +27,32 @@ export default class RangeCollection {
   }
 
   /**
+   * Check if second range is ahead of first range
+   * @param {Range} range1 First range
+   * @param {Range} range2 Second range
+   * @returns {Boolean} true if range2 is ahead of range1
+   */
+  _isAheadOf(range1, range2) {
+    return range2.left > range1.right;
+  }
+
+  _findIndexForRangeGreaterThan(range) {
+    const rangesL = this.ranges.length;
+    let lesserIndex = 0;
+    for (; lesserIndex < rangesL; lesserIndex += 1) {
+      const currentRange = this.ranges[lesserIndex];
+      // Continue for ranges smaller than input range
+      if (this._isAheadOf(currentRange, range)) {
+        continue;
+      } else {
+        break;
+      }
+    }
+
+    return lesserIndex;
+  }
+
+  /**
    * Adds a range to the collection
    * @param {Array<number>} range - Array of two integers that specify beginning and end of range.
    */
@@ -39,26 +65,22 @@ export default class RangeCollection {
       this.ranges.push(middleRange);
       return;
     }
-    if (this.ranges[rangesL - 1].right < middleRange.left) {
+    if (this._isAheadOf(this.ranges[rangesL - 1], middleRange)) {
       this.ranges.push(middleRange);
       return;
     }
-    if (middleRange.right < this.ranges[0].left) {
+    if (this._isAheadOf(middleRange, this.ranges[0])) {
       this.ranges.unshift(middleRange);
       return;
     }
 
-    let lesserIndex = 0;
-    let ind = 0;
+    let lesserIndex = this._findIndexForRangeGreaterThan(middleRange);
+    let ind = lesserIndex;
     for (; ind < rangesL; ind += 1) {
       const currentRange = this.ranges[ind];
-      // Skip ranges smaller than input range
-      if (middleRange.left > currentRange.right) {
-        lesserIndex += 1;
-        continue;
-      }
-      // No need to look ahead as ranges are greater than merge range
-      if (middleRange.right < currentRange.left) {
+      // No need to look ahead as next ranges are greater
+      // than mergedRange
+      if (this._isAheadOf(middleRange, currentRange)) {
         break;
       }
 
@@ -82,24 +104,20 @@ export default class RangeCollection {
     // Skip if no ranges or range outside current ranges
     if (
       rangesL === 0 ||
-      this.ranges[rangesL - 1].right < removeRange.left ||
-      removeRange.right < this.ranges[0].left
+      this._isAheadOf(this.ranges[rangesL - 1], removeRange) ||
+      this._isAheadOf(removeRange, this.ranges[0])
     ) {
       return;
     }
 
-    let lesserIndex = 0;
+    let lesserIndex = this._findIndexForRangeGreaterThan(removeRange);
+    let ind = lesserIndex;
     const middleRanges = [];
-    let ind = 0;
     for (; ind < rangesL; ind += 1) {
       const currentRange = this.ranges[ind];
-      // Skip ranges smaller than input range
-      if (removeRange.left > currentRange.right) {
-        lesserIndex += 1;
-        continue;
-      }
-      // No need to look ahead as ranges are greater than input range
-      if (removeRange.right < currentRange.left) {
+      // No need to look ahead as next ranges are greater
+      // than mergedRange
+      if (this._isAheadOf(removeRange, currentRange)) {
         break;
       }
 
